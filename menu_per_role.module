@@ -57,7 +57,7 @@ function menu_per_role_form_alter($form_id, &$form) {
 
  
 function menu_per_role_form_submit($form_id, $form_values) {
-  db_query("DELETE FROM {menu_per_role}");
+  db_query("DELETE FROM {menu_per_role} WHERE mid = %d", $form_values['mid']);
   foreach ($form_values['roles'] as $rid => $checked) {
     if ($checked) {
       db_query("INSERT INTO {menu_per_role} (mid, rid) VALUES(%d, %d)", $form_values['mid'], $rid);
