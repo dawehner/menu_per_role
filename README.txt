@@ -24,7 +24,7 @@ Then copy the module in your drupal modules directory and activate it.
 How to use it
 -------------
 Just activate the menu and the menu_per_role modules and edit a menu item as usual at
-/admin/menu. There will be a fieldset that allows you to restrict access by role.
+/admin/build/menu. There will be a fieldset that allows you to restrict access by role.
 
 If you don't check any roles the default access permissions will be kept. Otherwise the
 module will additionally restrict access to the chosen user roles.

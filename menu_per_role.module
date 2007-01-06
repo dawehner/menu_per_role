@@ -6,17 +6,6 @@
  * Allows restricting access to menu items per role
  */
 
-
-/**
- * Implementation of hook_help().
- */
-function menu_per_role_help($section) {
-  switch ($section) {
-    case 'admin/modules#description':
-      return t('Allows restricting access to menu items per role.');
-  }
-}
-
 /*
  * Determines access for a give menu item id
  */

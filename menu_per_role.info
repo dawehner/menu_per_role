@@ -1,0 +1,3 @@
+; $Id$
+name = Menu Per Role
+description = Allows restricting access to menu items per role.
