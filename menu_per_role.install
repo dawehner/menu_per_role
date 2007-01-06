@@ -1,0 +1,24 @@
+<?php
+// $Id$
+
+function menu_per_role_install() {
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysqli':
+    case 'mysql':     
+      db_query("CREATE TABLE if not exists {menu_per_role} (
+        mid int(10) unsigned,
+        rid int(10) unsigned,
+        PRIMARY KEY(mid, rid)
+      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      break;
+    case 'pgsql':
+      db_query("CREATE TABLE {menu_per_role} (
+        mid integer,
+        rid integer,
+        PRIMARY KEY(mid, rid)
+      )");
+    default:
+      break;
+  }
+}

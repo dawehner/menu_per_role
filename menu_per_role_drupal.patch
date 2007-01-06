@@ -1,0 +1,17 @@
+Index: includes/menu.inc
+===================================================================
+RCS file: /cvs/drupal/drupal/includes/menu.inc,v
+retrieving revision 1.120.2.8
+diff -u -r1.120.2.8 menu.inc
+--- includes/menu.inc	11 Dec 2006 17:30:36 -0000	1.120.2.8
++++ includes/menu.inc	6 Jan 2007 15:17:52 -0000
+@@ -1107,6 +1107,9 @@
+ 
+       // If the administrator has changed the item, reflect the change.
+       if ($item->type & MENU_MODIFIED_BY_ADMIN) {
++        if (module_exist('menu_per_role') && !is_null($access = menu_per_role_access($item->mid))) {
++          $_menu['items'][$item->mid]['access'] = isset($_menu['items'][$item->mid]['access']) ? $_menu['items'][$item->mid]['access'] && $access : $access;
++        }
+         $_menu['items'][$item->mid]['title'] = $item->title;
+         $_menu['items'][$item->mid]['description'] = $item->description;
+         $_menu['items'][$item->mid]['pid'] = $item->pid;
