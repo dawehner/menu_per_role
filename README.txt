@@ -18,7 +18,7 @@ Unfortunately you need to patch the drupal file includes/menu.inc. Use the the p
 provided with the module. If you don't know how to patch, you can just insert the three
 additional lines manually - but remove the leading plus.
 
-Then copy the module in your drupal modules directory and activate it.
+Then copy the module's whole directory in your drupal modules directory and activate it.
 
 
 How to use it
