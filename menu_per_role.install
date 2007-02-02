@@ -22,3 +22,7 @@ function menu_per_role_install() {
       break;
   }
 }
+
+function menu_per_role_uninstall() {
+  db_query("DROP TABLE {menu_per_role}");
+}
