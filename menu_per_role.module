@@ -47,7 +47,7 @@ function menu_per_role_form_alter($form_id, &$form) {
       '#type' => 'checkboxes',
       '#title' => t('Restrict access to only these roles'),
       '#options' => user_roles(),
-      '#default_value' => menu_per_role_get_roles($form['mid']['#value']),
+      '#default_value' => $form['mid']['#value'] ? menu_per_role_get_roles($form['mid']['#value']) : array(),
       '#description' => t('Check no role to leave the access permission to the default.'),
     );
     $form['submit']['#weight'] = 10;
@@ -57,7 +57,13 @@ function menu_per_role_form_alter($form_id, &$form) {
 
  
 function menu_per_role_form_submit($form_id, $form_values) {
-  db_query("DELETE FROM {menu_per_role} WHERE mid = %d", $form_values['mid']);
+  if ($form_values['mid']) {
+    db_query("DELETE FROM {menu_per_role} WHERE mid = %d", $form_values['mid']);
+  }
+  else {
+    //a new item has been added, try to determine the mid
+    $form_values['mid'] = db_result(db_query("SELECT `id` FROM {sequences} WHERE name = '{menu}_mid'"));
+  }
   foreach ($form_values['roles'] as $rid => $checked) {
     if ($checked) {
       db_query("INSERT INTO {menu_per_role} (mid, rid) VALUES(%d, %d)", $form_values['mid'], $rid);
