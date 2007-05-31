@@ -62,7 +62,7 @@ function menu_per_role_form_submit($form_id, $form_values) {
   }
   else {
     //a new item has been added, try to determine the mid
-    $form_values['mid'] = db_result(db_query("SELECT `id` FROM {sequences} WHERE name = '{menu}_mid'"));
+    $form_values['mid'] = db_result(db_query("SELECT id FROM {sequences} WHERE name = '{menu}_mid'"));
   }
   foreach ($form_values['roles'] as $rid => $checked) {
     if ($checked) {
