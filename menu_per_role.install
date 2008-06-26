@@ -1,28 +1,61 @@
 <?php
 // $Id$
 
+/**
+* Implementation of hook_install().
+*/
 function menu_per_role_install() {
+  // Create tables.
+  drupal_install_schema('menu_per_role');
+}
 
-  switch ($GLOBALS['db_type']) {
-    case 'mysqli':
-    case 'mysql':     
-      db_query("CREATE TABLE if not exists {menu_per_role} (
-        mid int(10) unsigned,
-        rid int(10) unsigned,
-        PRIMARY KEY(mid, rid)
-      ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      break;
-    case 'pgsql':
-      db_query("CREATE TABLE {menu_per_role} (
-        mid integer,
-        rid integer,
-        PRIMARY KEY(mid, rid)
-      )");
-    default:
-      break;
-  }
+/**
+* Implementation of hook_schema().
+*/
+function menu_per_role_schema() {
+  $schema['menu_per_role'] = array(
+    'fields' => array(
+      'mlid' => array(
+        'description' => t('The menu identifier.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+      'rid' => array(
+        'description' => t('The role identifier.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0),
+    ),
+    'primary key' => array(
+      'mlid', 'rid'),
+  );
+  return $schema;
 }
 
 function menu_per_role_uninstall() {
-  db_query("DROP TABLE {menu_per_role}");
+  // Remove tables.
+  drupal_uninstall_schema('menu_per_role');
+  // for use if we need it
+  //db_query("DELETE FROM {variable} WHERE name LIKE 'menu_per_role_%';");
+}
+
+/**
+ * Update from drupal 5
+ */
+function menu_per_role_update_6001() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql("ALTER TABLE {menu_per_role} CHANGE COLUMN mid mlid int(10) unsigned NOT NULL default 0");
+      break;
+    case 'pgsql':
+      db_change_column($ret, 'menu_per_role', 'mid', 'mlid', 'integer', array('not null' => TRUE, 'default' => "0"));
+      break;
+  }
+
+  return $ret;
 }

@@ -6,23 +6,49 @@
  * Allows restricting access to menu items per role
  */
 
-/*
- * Determines access for a give menu item id
+/**
+ * Implementation of hook_menu_alter().
  */
-function menu_per_role_access($mid) {
-  global $user;
-  $rids = menu_per_role_get_roles($mid);
+function menu_per_role_menu_alter(&$items) {
+  $result = db_query("SELECT mr.rid, ml.router_path FROM {menu_per_role} mr JOIN {menu_links} ml ON ml.mlid = mr.mlid");
+  $roles_by_path = array();
+  while ($row = db_fetch_object($result)) {
+    $roles_by_path[$row->router_path][] = $row->rid;
+  }
 
-  //NULL means inherit access from parent item
-  return count($rids) ? count(array_intersect($rids, array_keys($user->roles))) : NULL;
+  foreach ($roles_by_path as $path => $rids) {
+    $item = $items[$path] + array('access callback' => 'user_access', 'access arguments' => array());
+
+    $items[$path]['access callback'] = 'menu_per_role_access_callback';
+    $items[$path]['access arguments'] = array_merge(array($rids, $item['access callback'], $item['access arguments']));
+  }
 }
 
-/*
- * Gets all roles with access to the menu item
- * No roles mean that access should be inherited from the parent menu item
+/**
+ * Menu callback.
+ * @params The first argument is expected to be the role ids, for which access should be granted,
+ *   the second the original access callback,
+ *   and the left arguments will be passed to the orginial access callback.
  */
-function menu_per_role_get_roles($mid) {
-  $result = db_query("SELECT rid FROM {menu_per_role} WHERE mid = %d", $mid);
+function menu_per_role_access_callback() {
+  global $user;
+
+  $args = func_get_args();
+  $rids = array_shift($args);
+  $callback = array_shift($args);
+
+  if ($user->uid == 1 || count(array_intersect($rids, array_keys($user->roles)))) {
+    //access granted for the user, so check the original access now
+    return $callback($args);
+  }
+  return FALSE;
+}
+
+/**
+ * Gets all roles with access to the menu item
+ */
+function menu_per_role_get_roles($router_path) {
+  $result = db_query("SELECT rid FROM {menu_per_role} mr INNER JOIN {menu_links} ml ON ml.mlid = mr.mlid WHERE ml.router_path = '%s'", $router_path);
   $rids = array();
   while ($row = db_fetch_object($result)) {
     $rids[] = $row->rid;
@@ -30,44 +56,70 @@ function menu_per_role_get_roles($mid) {
   return $rids;
 }
 
+/**
+ * Gets the menu link item id for a given id
+ */
+function menu_per_role_get_mlid($router_path) {
+  $result = db_query("SELECT mr.mlid FROM {menu_per_role} mr INNER JOIN {menu_links} ml ON ml.mlid = mr.mlid WHERE ml.router_path = '%s'", $router_path);
+  return db_result($result);
+}
 
-/*
+/**
+ * Gets the menu links router path
+ */
+function menu_per_role_get_link_path($mlid) {
+  $result = db_query("SELECT router_path FROM {menu_links} WHERE mlid = %d", $mlid);
+  return db_result($result);
+}
+
+
+/**
  * Implementation of hook_form_alter().
  */
-function menu_per_role_form_alter($form_id, &$form) {
-  if ($form_id == 'menu_edit_item_form') {
+function menu_per_role_form_alter(&$form, &$form_state, $form_id) {
+
+  if ($form_id == 'menu_edit_item') {
+    $default = $form['menu']['mlid']['#value'] ? menu_per_role_get_roles($form['menu']['#item']['router_path']) : array();
     $form['menu_per_role'] = array(
       '#type' => 'fieldset',
       '#title' => t('Restrict access permission'),
       '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
+      '#collapsed' => count($default) == 0,
       '#weight' => 5,
     );
     $form['menu_per_role']['roles'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Restrict access to only these roles'),
       '#options' => user_roles(),
-      '#default_value' => $form['mid']['#value'] ? menu_per_role_get_roles($form['mid']['#value']) : array(),
-      '#description' => t('Check no role to leave the access permission to the default.'),
+      '#default_value' => $default,
+      '#description' => t('Check no role to not alter access permission. If you restrict permissions to a role, it will apply to all links pointing at the same page.'),
     );
     $form['submit']['#weight'] = 10;
-    $form['#submit']['menu_per_role_form_submit'] = array();
-  } 
-} 
-
- 
-function menu_per_role_form_submit($form_id, $form_values) {
-  if ($form_values['mid']) {
-    db_query("DELETE FROM {menu_per_role} WHERE mid = %d", $form_values['mid']);
-  }
-  else {
-    //a new item has been added, try to determine the mid
-    $form_values['mid'] = db_result(db_query("SELECT id FROM {sequences} WHERE name = '{menu}_mid'"));
-  }
-  foreach ($form_values['roles'] as $rid => $checked) {
-    if ($checked) {
-      db_query("INSERT INTO {menu_per_role} (mid, rid) VALUES(%d, %d)", $form_values['mid'], $rid);
-    }
+    $form['#submit'][] = 'menu_per_role_form_submit';
   }
 }
 
+function menu_per_role_form_submit($form, &$form_state) {
+  $mlid = $form_state['values']['menu']['mlid'] ? $form_state['values']['menu']['mlid'] : db_last_insert_id('menu_links', 'mlid');
+  $router_path = menu_per_role_get_link_path($mlid);
+
+  //determine if there is already a menu link with access permissions for this path
+  //if there is one, we update its settings instead
+  $existing_mlid = menu_per_role_get_mlid($router_path);
+  $mlid = $existing_mlid ? $existing_mlid : $mlid;
+
+  //when we are creating a new link, we might overwrite the settings of another link
+  //with the same path - don't do that!
+  if (!$form['menu']['mlid']['#value'] && $existing_mlid) {
+    if (array_filter($form_state['values']['roles'])) {
+      drupal_set_message(t('There is already a link pointing to the same page, which has already same role based access permissions. As there can be only access permissions once per page your access control settings have been ignored.'));
+    }
+    return;
+  }
+
+  db_query("DELETE FROM {menu_per_role} WHERE mlid = %d", $mlid);
+  foreach (array_filter($form_state['values']['roles']) as $rid => $checked) {
+    db_query("INSERT INTO {menu_per_role} (mlid, rid) VALUES (%d, %d)", $mlid, $rid);
+  }
+  menu_cache_clear_all();
+}
