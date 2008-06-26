@@ -10,18 +10,40 @@
  * Implementation of hook_menu_alter().
  */
 function menu_per_role_menu_alter(&$items) {
-  $result = db_query("SELECT mr.rid, ml.router_path FROM {menu_per_role} mr JOIN {menu_links} ml ON ml.mlid = mr.mlid");
-  $roles_by_path = array();
+  //alter the access of the menu items
+  $result = db_query("SELECT mr.rid, ml.link_path, ml.router_path FROM {menu_per_role} mr JOIN {menu_links} ml ON ml.mlid = mr.mlid");
+  $links = array();
   while ($row = db_fetch_object($result)) {
-    $roles_by_path[$row->router_path][] = $row->rid;
+    $links[$row->link_path]['rids'][] = $row->rid;
+    $links[$row->link_path]['router_path'] = $row->router_path;
   }
 
-  foreach ($roles_by_path as $path => $rids) {
-    $item = $items[$path] + array('access callback' => 'user_access', 'access arguments' => array());
+  foreach ($links as $link_path => $link) {
+    if (!isset($items[$link_path])) {
+      //create a menu item for the link path, if there is none
+      $items[$link_path] = _menu_per_role_get_item_by_router_path($link['router_path']);
+    }
+    $item = $items[$link_path] + array('access callback' => 'user_access', 'access arguments' => array());
 
-    $items[$path]['access callback'] = 'menu_per_role_access_callback';
-    $items[$path]['access arguments'] = array_merge(array($rids, $item['access callback'], $item['access arguments']));
+    $items[$link_path]['access callback'] = 'menu_per_role_access_callback';
+    $items[$link_path][] = array_merge(array($link['rids'], $item['access callback'], $item['access arguments']));
   }
+}
+
+/**
+ * TODO: this doesn't work as the router table might be empty at this stage.
+ */
+function _menu_per_role_get_item_by_router_path($path) {
+  $result = db_query("SELECT * FROM {menu_router} WHERE path = '%s'", str_replace('%', '%%', $path));
+  if ($item = db_fetch_array($result)) {
+    foreach (array('title_arguments', 'page_arguments', 'access_arguments') as $key) {
+      $item[$key] = unserialize($item[$key]);
+    }
+    $item['type'] = MENU_CALLBACK;
+    dprint_r($item);
+    return $item;
+  }
+  return array();
 }
 
 /**
@@ -32,14 +54,15 @@ function menu_per_role_menu_alter(&$items) {
  */
 function menu_per_role_access_callback() {
   global $user;
-
+echo 'da';
   $args = func_get_args();
   $rids = array_shift($args);
   $callback = array_shift($args);
 
   if ($user->uid == 1 || count(array_intersect($rids, array_keys($user->roles)))) {
     //access granted for the user, so check the original access now
-    return $callback($args);
+    //return ($callback == 'user_access' && empty($args)) ? TRUE : $callback($args);
+    return TRUE;
   }
   return FALSE;
 }
