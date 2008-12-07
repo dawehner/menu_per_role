@@ -1,0 +1,12 @@
+--- includes/menu.inc.orig	2008-10-22 10:04:12.000000000 -0700
++++ includes/menu.inc	2008-12-06 20:53:37.000000000 -0800
+@@ -452,6 +452,9 @@
+       $item['access'] = call_user_func_array($callback, $arguments);
+     }
+   }
++  if ($item['access'] && module_exists('menu_per_role') && _menu_per_role_access($item['mlid']) === FALSE) {
++    $item['access'] = FALSE;
++  }
+ }
+ 
+ /**

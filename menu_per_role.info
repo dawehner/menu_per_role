@@ -1,5 +1,7 @@
 ; $Id$
 name = Menu Per Role
-description = Allows restricting access to menu items per role.
+description = Allows restricting access to menu items per role. WARNING: you need to apply TWO patches against Drupal core for this module to fully function. See the README.txt file for more information.
+dependencies[] = menu
 package = Other
 core = 6.x
+
