@@ -41,7 +41,7 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
       '#type' => 'fieldset',
       '#title' => t('Restrict access permission'),
       '#collapsible' => TRUE,
-      '#collapsed' => empty($default_value),
+      '#collapsed' => count($default_value) == 0,
       '#weight' => 5,
       '#description' => t('Last check: check to know whether the user has proper permission to see the defined item.'),
     );
@@ -77,6 +77,7 @@ function _menu_per_role_form_submit($form, &$form_state) {
 	// if nothing was affected, the row did not exist yet
         db_query("INSERT INTO {menu_per_role} (mlid, rids) VALUES (%d, '%s')", $mlid, $rids_str);
       }
+      menu_cache_clear_all();
     }
     else {
       drupal_set_message(t('The menu link identifier was not defined on Submit in <b>Menu per Role</b>. You are most certainly adding a new menu item. For this feature to work when adding a menu item, you must apply the patch defined in <a href="http://drupal.org/node/326210" target="_blank">node #326210</a>. That patch is included in this module for that purpose.'), 'error');

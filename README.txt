@@ -29,6 +29,8 @@ Installation
 ------------
 Unfortunately you need to apply to patches to the drupal core files.
 
+Note: The 6.6 patches will work as is in 6.7.
+
 o Patch drupal-menu-submit-6.6.patch
 
   Fix a problem with the menu/add feature (that does not otherwise give
