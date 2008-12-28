@@ -87,6 +87,42 @@ function _menu_per_role_form_submit($form, &$form_state) {
 
 
 /*
+ * When the menu item is being submitted, the core also calls the
+ * hook_menu_link_alter(&$item, $menu);
+ *
+ * By catching that function, we can set the special alter option
+ * that will let our module receive a call whenever the menu is
+ * ready for display but was not yet displayed. At that time we
+ * can mark the access as FALSE.
+ */
+function menu_per_role_menu_link_alter(&$item, $menu)
+{
+  // TODO: The following marks ALL menu items as alterable.
+  //       Any time a menu item is saved, it is marked as
+  //       such. I have no clue, at this time, of a way to
+  //       avoid such nonsense. Hints welcome!
+  $item['options']['alter'] = TRUE;
+}
+
+
+/*
+ * Before a menu item gets displayed, the core calls the hook:
+ * hook_translated_menu_link_alter(&$item, $map);
+ * (but only if $item['options']['alter'] is TRUE)
+ *
+ * This function is used to alter the access right based on
+ * the role definition of the item.
+ */
+function menu_per_role_translated_menu_link_alter(&$item, $map)
+{
+  // avoid checking the role if the item access is already false
+  if ($item['access'] && _menu_per_role_access($item['mlid']) === FALSE) {
+    $item['access'] = FALSE;
+  }
+}
+
+
+/*
  * Gets all roles with access to the specified menu item
  * No roles mean that access should either be inherited from the parent menu item
  * or the user does not have access.
