@@ -38,3 +38,56 @@ function menu_per_role_schema() {
   );
   return $schema;
 }
+
+/**
+ * hook_update()
+ */
+function menu_per_role_update_6000() {
+  $ret = array();
+
+  // already using new schema?
+  if (db_column_exists('menu_per_role', 'active')) {
+    return $ret;
+  }
+
+  db_query('BEGIN');
+
+  // read the old data in memory (assuming it is not extra large, we should be fine)
+  $result = db_query('SELECT mid, rid FROM {menu_per_role} WHERE mid IS NOT NULL');
+  while($row = db_fetch_array($result)) {
+    $mid[$row['mid']][] = $row['rid'];
+  }
+
+  db_query('DELETE FROM menu_per_role');
+
+  // delete old schema
+  db_drop_field($ret, 'menu_per_role', 'mid');
+  db_drop_field($ret, 'menu_per_role', 'rid');
+
+  // create new fields right there
+  db_add_field($ret, 'menu_per_role', 'mlid', array(
+    'description' => t('The menu identifier.'),
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  ));
+  db_add_field($ret, 'menu_per_role', 'rids', array(
+    'description' => t('The role identifiers separated by commas.'),
+    'type' => 'text',
+    'not null' => TRUE,
+  ));
+
+  // save the old data in the new table
+  foreach ($mid as $key => $value) {
+    if (count($value) > 0) {
+      $list = implode(',', $value);
+      $ret[] = update_sql("INSERT INTO {menu_per_role} (mlid, rids) VALUES (" . $key . ", '" . $list . "')");
+    }
+  }
+
+  // we're done
+  db_query('COMMIT');
+
+  return $ret;
+}
