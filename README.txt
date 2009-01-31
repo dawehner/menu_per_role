@@ -30,7 +30,7 @@ Installation
 Unfortunately you need to apply to patches to the drupal core files.
 
 o Patch drupal-menu-submit-6.6.patch
-  (same patch for 6.7 and 6.8)
+  (same patch for 6.7, 6.8 and 6.9)
 
   Fix a problem with the menu/add feature (that does not otherwise give
   you the mlid and thus renders the submit function totally useless.)
