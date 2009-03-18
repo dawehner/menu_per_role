@@ -27,7 +27,8 @@ Then copy the module's whole directory in your drupal modules directory and acti
 <DRUPAL 6>
 Installation
 ------------
-Unfortunately you need to apply to patches to the drupal core files.
+Up to Drupal 6.9, you need to apply a patch to a menu file from Drupal core.
+This bug has now been fixed in the core (6.10+).
 
 o Patch drupal-menu-submit-6.6.patch
   (same patch for 6.7, 6.8 and 6.9)

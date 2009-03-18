@@ -46,7 +46,7 @@ function menu_per_role_update_6000() {
   $ret = array();
 
   // already using new schema?
-  if (db_column_exists('menu_per_role', 'active')) {
+  if (db_column_exists('menu_per_role', 'mlid')) {
     return $ret;
   }
 
