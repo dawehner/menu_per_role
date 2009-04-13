@@ -58,11 +58,7 @@ function menu_per_role_update_6000() {
     $mid[$row['mid']][] = $row['rid'];
   }
 
-  db_query('DELETE FROM menu_per_role');
-
-  // delete old schema
-  db_drop_field($ret, 'menu_per_role', 'mid');
-  db_drop_field($ret, 'menu_per_role', 'rid');
+  db_query('DELETE FROM {menu_per_role}');
 
   // create new fields right there
   db_add_field($ret, 'menu_per_role', 'mlid', array(
@@ -77,6 +73,11 @@ function menu_per_role_update_6000() {
     'type' => 'text',
     'not null' => TRUE,
   ));
+
+  // delete old schema fields and set new primary key
+  db_drop_field($ret, 'menu_per_role', 'mid');
+  db_drop_field($ret, 'menu_per_role', 'rid');
+  db_add_primary_key($ret, 'menu_per_role', array('mlid'));
 
   // save the old data in the new table
   foreach ($mid as $key => $value) {
