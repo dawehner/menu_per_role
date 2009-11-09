@@ -30,7 +30,7 @@ Installation
 Up to Drupal 6.9, you need to apply a patch to a menu file from Drupal core.
 This bug has now been fixed in the core (6.10+).
 
-o Patch drupal-menu-submit-6.6.patch
+o Patch drupal-6.6-menu-submit.patch
   (same patch for 6.7, 6.8 and 6.9)
 
   Fix a problem with the menu/add feature (that does not otherwise give

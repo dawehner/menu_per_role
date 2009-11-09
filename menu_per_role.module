@@ -10,10 +10,13 @@
  * Determines access for a give menu item id
  *
  * \warning
- * This function is NOT called automatically. You need to apply the
- * patch provided in this module so it actually works. See file:
+ * This function is NOT called automatically up to version 6.10.
+ * You need to apply the patch provided in this module so it
+ * actually works in older versions. See file:
  *
  * drupal-6.6-menu_per_role.patch
+ *
+ * \param[in] $mlid The menu item identifier
  */
 function _menu_per_role_access($mlid) {
   global $user;
@@ -36,23 +39,29 @@ function _menu_per_role_access($mlid) {
  */
 function menu_per_role_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'menu_edit_item') {
+    $f = &$form;
+    $form['submit']['#weight'] = 10;
+  }
+  if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && isset($form['menu'])) {
+    $f = &$form['menu'];
+  }
+  if (isset($f)) {
     $default_value = $form['menu']['mlid']['#value'] ? _menu_per_role_get_roles($form['menu']['mlid']['#value']) : array();
-    $form['menu_per_role'] = array(
+    $f['menu_per_role'] = array(
       '#type' => 'fieldset',
       '#title' => t('Restrict access permission'),
       '#collapsible' => TRUE,
       '#collapsed' => count($default_value) == 0,
       '#weight' => 5,
-      '#description' => t('Last check: check to know whether the user has proper permission to see the defined item.'),
+      '#description' => t('Check to know whether the user has proper permissions to see this menu item.'),
     );
-    $form['menu_per_role']['roles'] = array(
+    $f['menu_per_role']['menu_per_role_roles'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Restrict access to only these roles'),
       '#options' => user_roles(),
       '#default_value' => $default_value,
       '#description' => t('Check no role to leave the access permission to the default.'),
     );
-    $form['submit']['#weight'] = 10;
     $form['#submit'][] = '_menu_per_role_form_submit';
   }
 }
@@ -66,7 +75,10 @@ function _menu_per_role_form_submit($form, &$form_state) {
     $mlid = $form_state['values']['menu']['mlid'];
     if ($mlid) {
       $rids = array();
-      foreach ($form_state['values']['roles'] as $rid => $checked) {
+      $roles = isset($form_state['values']['menu_per_role_roles']) ?
+                     $form_state['values']['menu_per_role_roles']
+                     : $form_state['values']['menu']['menu_per_role']['menu_per_role_roles'];
+      foreach ($roles as $rid => $checked) {
         if ($checked) {
           $rids[] = $rid;
         }
@@ -124,8 +136,7 @@ function menu_per_role_translated_menu_link_alter(&$item, $map)
 
 /*
  * Gets all roles with access to the specified menu item
- * No roles mean that access should either be inherited from the parent menu item
- * or the user does not have access.
+ * No roles mean that access is granted by this module.
  */
 function _menu_per_role_get_roles($mlid) {
   $result = db_query("SELECT rids FROM {menu_per_role} WHERE mlid = %d", $mlid);
