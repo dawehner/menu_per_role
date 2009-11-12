@@ -91,7 +91,7 @@ function _menu_per_role_form_submit($form, &$form_state) {
       }
       menu_cache_clear_all();
     }
-    else {
+    else if (isset($form_state['values']['menu_per_role_roles'])) {
       drupal_set_message(t('The menu link identifier was not defined on Submit in <b>Menu per Role</b>. You are most certainly adding a new menu item. For this feature to work when adding a menu item, you must apply the patch defined in <a href="http://drupal.org/node/326210" target="_blank">node #326210</a>. That patch is included in this module for that purpose.'), 'error');
     }
   }
