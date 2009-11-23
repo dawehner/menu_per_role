@@ -29,7 +29,12 @@ function menu_per_role_schema() {
         'default' => 0,
       ),
       'rids' => array(
-        'description' => t('The role identifiers separated by commas.'),
+        'description' => t('The role identifiers separated by commas. Show to those roles.'),
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'hrids' => array(
+        'description' => t('The role identifiers separated by commas. Hide from those roles.'),
         'type' => 'text',
         'not null' => TRUE,
       ),
@@ -92,3 +97,26 @@ function menu_per_role_update_6000() {
 
   return $ret;
 }
+
+/**
+ * hook_update()
+ */
+function menu_per_role_update_6001() {
+  $ret = array();
+
+  // already using new schema?
+  if (db_column_exists('menu_per_role', 'hrids')) {
+    return $ret;
+  }
+
+  // create new field
+  db_add_field($ret, 'menu_per_role', 'hrids', array(
+    'description' => t('The role identifiers separated by commas. Hide from those roles.'),
+    'type' => 'text',
+    'not null' => TRUE,
+    'default' => '',
+  ));
+
+  return $ret;
+}
+// vim: syntax=php
