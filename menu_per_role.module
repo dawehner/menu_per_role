@@ -120,11 +120,13 @@ function _menu_per_role_form_submit($form, &$form_state) {
       }
       $hrids_str = implode(',', $hrids);
       // save in our table
+      db_lock_table('menu_per_role');
       db_query("UPDATE {menu_per_role} SET rids = '%s', hrids = '%s' WHERE mlid = %d", $rids_str, $hrids_str, $mlid);
       if (db_affected_rows() == 0) {
 	// if nothing was affected, the row did not exist yet
         db_query("INSERT INTO {menu_per_role} (mlid, rids, hrids) VALUES (%d, '%s', '%s')", $mlid, $rids_str, $hrids_str);
       }
+      db_unlock_tables();
       // reset the menus
       menu_cache_clear_all();
     }
