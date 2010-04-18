@@ -7,6 +7,13 @@
  */
 
 /*
+ * Permission for who can access the menu per role forms.
+ */
+function menu_per_role_perm() {
+  return array('administer menu_per_role');
+}
+
+/*
  * Determines access for a give menu item id
  *
  * \warning
@@ -53,6 +60,10 @@ function _menu_per_role_access($mlid) {
  * Implementation of hook_form_alter().
  */
 function menu_per_role_form_alter(&$form, $form_state, $form_id) {
+  if (!user_access('administer menu_per_role')) {
+    return;
+  }
+
   if ($form_id == 'menu_edit_item') {
     $f = &$form;
     $form['submit']['#weight'] = 10;
@@ -200,3 +211,5 @@ function _menu_per_role_get_hide_from_roles($mlid) {
   // not defined, everyone has the right to use it
   return array();
 }
+
+// vim: ts=2 sw=2 et syntax=php
