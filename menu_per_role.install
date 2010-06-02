@@ -26,7 +26,6 @@ function menu_per_role_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'default' => 0,
       ),
       'rids' => array(
         'description' => t('The role identifiers separated by commas. Show to those roles.'),
@@ -119,4 +118,17 @@ function menu_per_role_update_6001() {
 
   return $ret;
 }
-// vim: syntax=php
+
+/**
+ * hook_update_N();
+ */
+function menu_per_role_update_6002() {
+  $ret = array();
+
+  // This default creates problems with MySQL and really it should not be there!
+  db_field_set_no_default($ret, 'menu_per_role', 'mlid');
+
+  return $ret;
+}
+
+// vim: ts=2 sw=2 et syntax=php
