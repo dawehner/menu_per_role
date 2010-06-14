@@ -105,6 +105,8 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
  * Internal function to save the data in our table.
  */
 function _menu_per_role_form_submit($form, &$form_state) {
+  global $db_type;
+
   if ($form_state['submitted']) {
     $mlid = $form_state['values']['menu']['mlid'];
     if ($mlid) {
@@ -138,7 +140,15 @@ function _menu_per_role_form_submit($form, &$form_state) {
           // if nothing was affected, the row did not exist yet
           // (although with MySQL this may fail because db_affected_rows() may only return
           // rows that have been changed instead of the # of rows that match the WHERE clause.)
-          db_query("INSERT INTO {menu_per_role} (mlid, rids, hrids) VALUES (%d, '%s', '%s')", $mlid, $rids_str, $hrids_str);
+          if ($db_type != 'pgsql') {
+            $insert = !db_result(db_query("SELECT 1 FROM {menu_per_role} WHERE mlid = %d", $mlid));
+          }
+          else {
+            $insert = TRUE;
+          }
+          if ($insert) {
+            db_query("INSERT INTO {menu_per_role} (mlid, rids, hrids) VALUES (%d, '%s', '%s')", $mlid, $rids_str, $hrids_str);
+          }
         }
       }
       else {
