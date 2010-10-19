@@ -131,4 +131,17 @@ function menu_per_role_update_6002() {
   return $ret;
 }
 
+/**
+ * hook_update_N();
+ */
+function menu_per_role_update_6003() {
+  $ret = array();
+
+  // We do not need to have empty entries, this will accelerate total
+  // processing time on every page load
+  db_query("DELETE FROM {menu_per_role} WHERE rids = '' AND hrids = ''");
+
+  return $ret;
+}
+
 // vim: ts=2 sw=2 et syntax=php

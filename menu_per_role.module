@@ -38,14 +38,14 @@ function _menu_per_role_access($mlid) {
   }
 
   // check whether this role has visibility access (must be present)
-  $rids = _menu_per_role_get_roles($mlid);
+  $rids = _menu_per_role_get_roles($mlid, 0);
   if (!empty($rids) && count(array_intersect($rids, array_keys($user->roles))) == 0) {
     // not permitted by the rids...
     return FALSE;
   }
 
   // check whether this role has visibility access (must not be present)
-  $hrids = _menu_per_role_get_hide_from_roles($mlid);
+  $hrids = _menu_per_role_get_roles($mlid, 1);
   if (!empty($hrids) && count(array_intersect($hrids, array_keys($user->roles))) > 0) {
     // not permitted by the hrids...
     return FALSE;
@@ -72,8 +72,12 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
     $f = &$form['menu'];
   }
   if (isset($f)) {
-    $default_value_roles = $form['menu']['mlid']['#value'] ? _menu_per_role_get_roles($form['menu']['mlid']['#value']) : array();
-    $default_value_hide_from_roles = $form['menu']['mlid']['#value'] ? _menu_per_role_get_hide_from_roles($form['menu']['mlid']['#value']) : array();
+    $default_value_roles = $form['menu']['mlid']['#value']
+      ? _menu_per_role_get_roles($form['menu']['mlid']['#value'], 0)
+      : array();
+    $default_value_hide_from_roles = $form['menu']['mlid']['#value']
+      ? _menu_per_role_get_roles($form['menu']['mlid']['#value'], 1)
+      : array();
     $f['menu_per_role'] = array(
       '#type' => 'fieldset',
       '#title' => t('Restrict item visibility'),
@@ -202,28 +206,29 @@ function menu_per_role_translated_menu_link_alter(&$item, $map)
 }
 
 
-/*
+/**
  * Gets all roles with access to the specified menu item
  * No roles mean that access is granted by this module.
+ *
+ * $show set to 0 for show to roles, 1 for hide from roles
  */
-function _menu_per_role_get_roles($mlid) {
-  $result = db_query("SELECT rids FROM {menu_per_role} WHERE mlid = %d", $mlid);
-  if ($result && ($row = db_fetch_object($result)) && $row->rids) {
-    return explode(',', $row->rids);
+function _menu_per_role_get_roles($mlid, $show) {
+  static $menu_per_role;
+
+  if (!isset($menu_per_role)) {
+    // read all the data ONCE, it is likely very small
+    $menu_per_role = array();
+    $result = db_query("SELECT * FROM {menu_per_role}");
+    while ($row = db_fetch_object($result)) {
+      if ($row->rids || $row->hrids) {
+        $menu_per_role[$row->mlid][0] = explode(',', $row->rids);
+        $menu_per_role[$row->mlid][1] = explode(',', $row->hrids);
+      }
+    }
   }
 
-  // not defined, everyone has the right to use it
-  return array();
-}
-
-/*
- * Gets all roles without access to the specified menu item
- * No roles mean that access is granted by this module.
- */
-function _menu_per_role_get_hide_from_roles($mlid) {
-  $result = db_query("SELECT hrids FROM {menu_per_role} WHERE mlid = %d", $mlid);
-  if ($result && ($row = db_fetch_object($result)) && $row->hrids) {
-    return explode(',', $row->hrids);
+  if (isset($menu_per_role[$mlid])) {
+    return $menu_per_role[$mlid][$show];
   }
 
   // not defined, everyone has the right to use it
