@@ -105,6 +105,39 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
 }
 
 
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * When inserting the menu in a node, the form is "not really there" at
+ * the time of the Save. To make it work properly, we need to add this
+ * entry. Note also that the submit function does not have access to
+ * the 'mlid' yet since it was not yet created.
+ *
+ * IMPORTANT NOTE: We get executed right after the menu module, which
+ * is important since the menu module is the one that generates the
+ * 'mlid'. The module would otherwise need to be moved using a weight
+ * of 1 or more in the system table.
+ */
+function menu_per_role_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+  case 'insert':
+    if (!empty($node->menu['mlid'])) {
+      $form_state = array(
+        'submitted' => 1,
+        'values' => array(
+          'menu' => $node->menu,
+          'menu_per_role_roles' => $node->menu['menu_per_role']['menu_per_role_roles'],
+          'menu_per_role_hide_from_roles' => $node->menu['menu_per_role']['menu_per_role_hide_from_roles'],
+        ),
+      );
+      _menu_per_role_form_submit(NULL, $form_state);
+    }
+    break;
+
+  }
+}
+
+
 /*
  * Internal function to save the data in our table.
  */
