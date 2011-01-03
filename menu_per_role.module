@@ -254,8 +254,18 @@ function _menu_per_role_get_roles($mlid, $show) {
     $result = db_query("SELECT * FROM {menu_per_role}");
     while ($row = db_fetch_object($result)) {
       if ($row->rids || $row->hrids) {
-        $menu_per_role[$row->mlid][0] = explode(',', $row->rids);
-        $menu_per_role[$row->mlid][1] = explode(',', $row->hrids);
+        if ($row->rids) {
+          $menu_per_role[$row->mlid][0] = explode(',', $row->rids);
+        }
+        else {
+          $menu_per_role[$row->mlid][0] = array();
+        }
+        if ($row->hrids) {
+          $menu_per_role[$row->mlid][1] = explode(',', $row->hrids);
+        }
+        else {
+          $menu_per_role[$row->mlid][1] = array();
+        }
       }
     }
   }
