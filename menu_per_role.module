@@ -67,6 +67,8 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'menu_edit_item') {
     $f = &$form;
     $form['submit']['#weight'] = 10;
+    // this callback does not work in nodes because the mlid is not available, see menu_per_role_nodeapi()
+    $form['#submit'][] = '_menu_per_role_form_submit';
   }
   if (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && isset($form['menu'])) {
     $f = &$form['menu'];
@@ -100,7 +102,6 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
       '#default_value' => $default_value_hide_from_roles,
       '#description' => t('Check no role to leave the access permission to the default. A user who is part of any one of these roles will not see this menu item.'),
     );
-    $form['#submit'][] = '_menu_per_role_form_submit';
   }
 }
 
@@ -121,6 +122,7 @@ function menu_per_role_form_alter(&$form, $form_state, $form_id) {
 function menu_per_role_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
   case 'insert':
+  case 'update':
     if (!empty($node->menu['mlid'])) {
       $form_state = array(
         'submitted' => 1,
