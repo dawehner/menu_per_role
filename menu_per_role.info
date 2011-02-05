@@ -2,6 +2,6 @@
 name = Menu Per Role
 description = Allows restricting access to menu items per role.
 dependencies[] = menu
-package = Other
+package = Menu
 core = 6.x
 
