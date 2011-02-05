@@ -13,6 +13,9 @@ function menu_per_role_install() {
  */
 function menu_per_role_uninstall() {
   drupal_uninstall_schema('menu_per_role');
+
+  variable_del('menu_per_role_uid1_see_all');
+  variable_del('menu_per_role_admin_see_all');
 }
 
 /*
@@ -140,6 +143,18 @@ function menu_per_role_update_6003() {
   // We do not need to have empty entries, this will accelerate total
   // processing time on every page load
   db_query("DELETE FROM {menu_per_role} WHERE rids = '' AND hrids = ''");
+
+  return $ret;
+}
+
+/**
+ * hook_update_N();
+ */
+function menu_per_role_update_6004() {
+  $ret = array();
+
+  // for the menu to rebuild
+  variable_set('menu_rebuild_needed', TRUE);
 
   return $ret;
 }
