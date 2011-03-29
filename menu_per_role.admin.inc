@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administration form for menu items.
@@ -60,7 +59,7 @@ function menu_per_role_settings_form($form_state) {
 function _menu_per_role_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'menu_edit_item') {
     $f = &$form;
-    $form['submit']['#weight'] = 10;
+    $form['submit']['#weight'] = 9;
     // this callback does not work in nodes because the mlid is not available, see menu_per_role_nodeapi()
     $form['#submit'][] = '_menu_per_role_form_submit';
   }
