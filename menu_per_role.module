@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Allows restricting access to menu items per role
@@ -30,15 +29,15 @@ function menu_per_role_menu() {
  *
  * drupal-6.6-menu_per_role.patch
  *
- * \param[in] $mlid The menu item identifier
+ * \param[in] $item The complete menu item
  *
  * \return NULL if this module does not forbid the viewing of this menu item,
  * FALSE otherwise
  */
-function _menu_per_role_access($mlid) {
+function _menu_per_role_access($item) {
   global $user;
 
-  if (empty($mlid)) {
+  if (empty($item['mlid'])) {
     // no menu indicated, there's nothing to block
     return NULL;
   }
@@ -56,15 +55,20 @@ function _menu_per_role_access($mlid) {
     return NULL;
   }
 
+  // if this menu is being edited, make sure the administrator sees all of its items
+  if (arg(0) == 'admin' && arg(1) == 'build' && arg(2) == 'menu-customize' && arg(3) == $item['menu_name']) {
+    return NULL;
+  }
+
   // check whether this role has visibility access (must be present)
-  $rids = _menu_per_role_get_roles($mlid, 0);
+  $rids = _menu_per_role_get_roles($item['mlid'], 0);
   if (!empty($rids) && count(array_intersect($rids, array_keys($user->roles))) == 0) {
     // not permitted by the rids...
     return FALSE;
   }
 
   // check whether this role has visibility access (must not be present)
-  $hrids = _menu_per_role_get_roles($mlid, 1);
+  $hrids = _menu_per_role_get_roles($item['mlid'], 1);
   if (!empty($hrids) && count(array_intersect($hrids, array_keys($user->roles))) > 0) {
     // not permitted by the hrids...
     return FALSE;
@@ -151,7 +155,7 @@ function menu_per_role_menu_link_alter(&$item, $menu)
 function menu_per_role_translated_menu_link_alter(&$item, $map)
 {
   // avoid checking the role if the item access is already false
-  if ($item['access'] && _menu_per_role_access($item['mlid']) === FALSE) {
+  if ($item['access'] && _menu_per_role_access($item) === FALSE) {
     $item['access'] = FALSE;
   }
 }
