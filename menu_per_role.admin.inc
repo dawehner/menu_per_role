@@ -50,6 +50,14 @@ function menu_per_role_settings_form($form_state) {
     '#default_value' => variable_get('menu_per_role_admin_see_all', 0),
   );
 
+  $form['menu_per_role_hide_show'] = array(
+    '#type' => 'radios',
+    '#title' => t('Select what is shown when editing menu items'),
+    '#options' => array(0 => t('Hide and Show check boxes'), 1 => t('Only Hide check boxes'), 2 => t('Only Show check boxes')),
+    '#description' => t('By default, both list of check boxes are shown when editing a menu item (in the menu administration area or while editing a node.) This option let you choose to only show the "Show menu item only to selected roles" or "Hide menu item from selected roles". WARNING: changing this option does not change the existing selection. This means some selection will become invisible when you hide one of the set of check boxes...'),
+    '#default_value' => variable_get('menu_per_role_hide_show', 0),
+  );
+
   return system_settings_form($form);
 }
 
@@ -81,20 +89,25 @@ function _menu_per_role_form_alter(&$form, $form_state, $form_id) {
       '#weight' => 5,
       '#description' => t('Check to know whether the user has proper visibility permissions to see this menu item. Note that both checks are always performed.'),
     );
-    $f['menu_per_role']['menu_per_role_roles'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Show menu item only to selected roles'),
-      '#options' => user_roles(),
-      '#default_value' => $default_value_roles,
-      '#description' => t('Check no role to leave the access permission to the default. A user who is not part of at least one of the selected roles will not see this menu item.'),
-    );
-    $f['menu_per_role']['menu_per_role_hide_from_roles'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Hide menu item from selected roles'),
-      '#options' => user_roles(),
-      '#default_value' => $default_value_hide_from_roles,
-      '#description' => t('Check no role to leave the access permission to the default. A user who is part of any one of these roles will not see this menu item.'),
-    );
+    $hide_show = variable_get('menu_per_role_hide_show', 0);
+    if ($hide_show == 0 || $hide_show == 2) {
+      $f['menu_per_role']['menu_per_role_roles'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Show menu item only to selected roles'),
+        '#options' => user_roles(),
+        '#default_value' => $default_value_roles,
+        '#description' => t('Check no role to leave the access permission to the default. A user who is not part of at least one of the selected roles will not see this menu item.'),
+      );
+    }
+    if ($hide_show == 0 || $hide_show == 1) {
+      $f['menu_per_role']['menu_per_role_hide_from_roles'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Hide menu item from selected roles'),
+        '#options' => user_roles(),
+        '#default_value' => $default_value_hide_from_roles,
+        '#description' => t('Check no role to leave the access permission to the default. A user who is part of any one of these roles will not see this menu item.'),
+      );
+    }
   }
 }
 

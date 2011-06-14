@@ -1,5 +1,4 @@
 <?php
-
 /*
  * Implementation of hook_install();
  */
@@ -15,6 +14,7 @@ function menu_per_role_uninstall() {
 
   variable_del('menu_per_role_uid1_see_all');
   variable_del('menu_per_role_admin_see_all');
+  variable_del('menu_per_role_hide_show');
 }
 
 /*
