@@ -42,6 +42,12 @@ It is smart to patch the menu file before installing the Menu per Role
 so it works immediately. Although you can patch at any time. It just
 won't work 100% properly until then.
 
+<DRUPAL 7>
+Installation
+------------
+There is no patch for Drupal 7.x. Simply go to the module administration
+screen and select the module and click Save.
+
 How to use it
 -------------
 Just activate the menu and the menu_per_role modules and edit a menu item as usual at
