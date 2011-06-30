@@ -69,8 +69,8 @@ function menu_per_role_menu_link_insert($link) {
     $hrids_str = _menu_per_role_serialize_rids($link['menu_per_role']['menu_per_role_hide_from_roles']);
 
     $fields = array('rids' => $rids_str, 'hrids' => $hrids_str, 'mlid' => $link['mlid']);
-		drupal_write_record('menu_per_role', $fields);
-		/*
+    drupal_write_record('menu_per_role', $fields);
+    /*
     db_insert('menu_per_role')->fields($fields)->execute();
     */
   }
