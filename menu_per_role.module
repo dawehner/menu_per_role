@@ -154,9 +154,8 @@ function menu_per_role_translated_menu_link_alter(&$item, $map) {
 function _menu_per_role_access($mlid) {
   global $user;
 
-  if ($user->uid == 1 || empty($mlid) || user_access('administer menu_per_role')) {
-    // Admins do not lose access whatever this module would otherwise say
-    // Also, if the menu link identifier is not set, ignore the request
+  // In D7+ administrators have their own role so no special case here
+  if (empty($mlid)) {
     return NULL;
   }
 
