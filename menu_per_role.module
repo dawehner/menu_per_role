@@ -154,8 +154,12 @@ function menu_per_role_translated_menu_link_alter(&$item, $map) {
 function _menu_per_role_access($mlid) {
   global $user;
 
-  // In D7+ administrators have their own role so no special case here
   if (empty($mlid)) {
+    return NULL;
+  }
+
+  // If menu is being edited allow user to see it in full
+  if (arg(0) == 'admin' && arg(1) == 'structure' && arg(2) == 'menu') {
     return NULL;
   }
 
