@@ -1,0 +1,3 @@
+administer menu_per_role:
+  title: Administer menu per role
+  description: Permission for who can access the menu per role forms.

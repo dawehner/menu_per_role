@@ -4,21 +4,6 @@
  * Allows restricting access to menu items per role
  */
 
-
-/**
- * Implements hook_permission().
- */
-function menu_per_role_permission() {
-  $permissions = array();
-
-  $permissions['administer menu_per_role'] = array(
-    'title' => t("Administer menu per role"),
-    'description' => t("Permission for who can access the menu per role forms."),
-  );
-
-  return $permissions;
-}
-
 /**
  * Implementation of hook_menu_link_alter()
  */
