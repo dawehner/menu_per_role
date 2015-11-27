@@ -62,57 +62,6 @@ function menu_per_role_settings_form($form_state) {
 }
 
 /*
- * Implementation of hook_form_alter().
- */
-function _menu_per_role_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == 'menu_edit_item') {
-    $f = &$form;
-    $form['submit']['#weight'] = 9;
-    // this callback does not work in nodes because the mlid is not available, see menu_per_role_nodeapi()
-    $form['#submit'][] = '_menu_per_role_form_submit';
-  }
-  elseif (isset($form['#node']) && $form['#node']->type .'_node_form' == $form_id && isset($form['menu'])) {
-    $f = &$form['menu'];
-  }
-  if (isset($f)) {
-    $default_value_roles = $form['menu']['mlid']['#value']
-      ? _menu_per_role_get_roles($form['menu']['mlid']['#value'], 0)
-      : array();
-    $default_value_hide_from_roles = $form['menu']['mlid']['#value']
-      ? _menu_per_role_get_roles($form['menu']['mlid']['#value'], 1)
-      : array();
-    $f['menu_per_role'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Restrict item visibility'),
-      '#collapsible' => TRUE,
-      '#collapsed' => (count($default_value_roles) + count($default_value_hide_from_roles)) == 0,
-      '#weight' => 5,
-      '#description' => t('Check to know whether the user has proper visibility permissions to see this menu item. Note that both checks are always performed.'),
-    );
-    $hide_show = variable_get('menu_per_role_hide_show', 0);
-    if ($hide_show == 0 || $hide_show == 2) {
-      $f['menu_per_role']['menu_per_role_roles'] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Show menu item only to selected roles'),
-        '#options' => user_roles(),
-        '#default_value' => $default_value_roles,
-        '#description' => t('Check no role to leave the access permission to the default. A user who is not part of at least one of the selected roles will not see this menu item.'),
-      );
-    }
-    if ($hide_show == 0 || $hide_show == 1) {
-      $f['menu_per_role']['menu_per_role_hide_from_roles'] = array(
-        '#type' => 'checkboxes',
-        '#title' => t('Hide menu item from selected roles'),
-        '#options' => user_roles(),
-        '#default_value' => $default_value_hide_from_roles,
-        '#description' => t('Check no role to leave the access permission to the default. A user who is part of any one of these roles will not see this menu item.'),
-      );
-    }
-  }
-}
-
-
-/*
  * Internal function to save the data in our table.
  *
  * This function is also called from the menu_per_role_nodeapi() function.

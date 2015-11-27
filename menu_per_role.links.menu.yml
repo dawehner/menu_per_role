@@ -1,0 +1,4 @@
+menu_per_role.settings:
+  title: 'Administer menu per role'
+  description: 'Permission for who can access the menu per role forms.'
+  role_name: menu_per_role.settings

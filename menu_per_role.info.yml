@@ -1,6 +1,7 @@
+type: module
 name: Menu Per Role
 description: Allows restricting access to menu items per role.
 dependencies:
-  - menu
-package = Access control
+  - menu_link_content
+package: Access control
 core: 8.x

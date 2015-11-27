@@ -1,1 +1,36 @@
 <?php
+
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+/**
+ * Implements hook_install().
+ */
+function menu_per_role_install() {
+  /** @var \Drupal\Core\Entity\EntityDefinitionUpdateManagerInterface $update_manager */
+  $update_manager = \Drupal::service('entity.definition_update_manager');
+
+  $definition = BaseFieldDefinition::create('entity_reference')
+    ->setName('menu_per_role__show_role')
+    ->setTargetEntityTypeId('menu_link_content')
+    ->setLabel(t('Roles able to see the menu link'))
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ->setSetting('target_type', 'user_role')
+    ->setProvider('menu_per_role')
+    ->setDisplayOptions('form', [
+      'type' => 'entity_reference_autocomplete_tags',
+    ]);
+  $update_manager->installFieldStorageDefinition('menu_per_role__show_role', 'menu_link_content', 'menu_per_role', $definition);
+
+  $definition = BaseFieldDefinition::create('entity_reference')
+    ->setName('menu_per_role__show_role')
+    ->setTargetEntityTypeId('menu_link_content')
+    ->setLabel(t('Roles able to not see the menu link'))
+    ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
+    ->setSetting('target_type', 'user_role')
+    ->setProvider('menu_per_role')
+    ->setDisplayOptions('form', [
+      'type' => 'entity_reference_autocomplete_tags',
+    ]);
+  $update_manager->installFieldStorageDefinition('menu_per_role__hide_role', 'menu_link_content', 'menu_per_role', $definition);
+}
