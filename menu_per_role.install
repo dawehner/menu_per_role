@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Install and update hooks.
+ */
+
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
@@ -18,7 +23,7 @@ function menu_per_role_install() {
     ->setSetting('target_type', 'user_role')
     ->setProvider('menu_per_role')
     ->setDisplayOptions('form', [
-      'type' => 'entity_reference_autocomplete_tags',
+      'type' => 'options_buttons',
     ]);
   $update_manager->installFieldStorageDefinition('menu_per_role__show_role', 'menu_link_content', 'menu_per_role', $definition);
 
@@ -30,7 +35,7 @@ function menu_per_role_install() {
     ->setSetting('target_type', 'user_role')
     ->setProvider('menu_per_role')
     ->setDisplayOptions('form', [
-      'type' => 'entity_reference_autocomplete_tags',
+      'type' => 'options_buttons',
     ]);
   $update_manager->installFieldStorageDefinition('menu_per_role__hide_role', 'menu_link_content', 'menu_per_role', $definition);
 }

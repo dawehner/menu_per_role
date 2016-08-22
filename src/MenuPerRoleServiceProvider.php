@@ -5,6 +5,11 @@ namespace Drupal\menu_per_role;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceModifierInterface;
 
+/**
+ * ServiceModifier implementation.
+ *
+ * @package Drupal\menu_per_role
+ */
 class MenuPerRoleServiceProvider implements ServiceModifierInterface {
 
   /**
