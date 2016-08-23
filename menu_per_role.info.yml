@@ -3,5 +3,6 @@ name: Menu Per Role
 description: Allows restricting access to menu items per role.
 dependencies:
   - menu_link_content
+configure: menu_per_role.settings
 package: Access control
 core: 8.x

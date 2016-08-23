@@ -1,7 +1,8 @@
 <?php
+
 /**
  * @file
- * Allows restricting access to menu items per role
+ * Allows restricting access to menu items per role.
  */
 
 use Drupal\Core\Entity\EntityTypeInterface;
@@ -23,7 +24,7 @@ function menu_per_role_entity_base_field_info_alter(&$fields, EntityTypeInterfac
     ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
     ->setSetting('target_type', 'user_role')
     ->setDisplayOptions('form', [
-      'type' => 'entity_reference_autocomplete_tags',
+      'type' => 'options_buttons',
     ]);
 
   $fields['menu_per_role__hide_role'] = BaseFieldDefinition::create('entity_reference')
@@ -33,6 +34,6 @@ function menu_per_role_entity_base_field_info_alter(&$fields, EntityTypeInterfac
     ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
     ->setSetting('target_type', 'user_role')
     ->setDisplayOptions('form', [
-      'type' => 'entity_reference_autocomplete_tags',
+      'type' => 'options_buttons',
     ]);
 }

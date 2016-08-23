@@ -1,8 +1,7 @@
 menu_per_role.settings:
-  path: 'admin/settings/menu_per_role'
+  path: 'admin/config/system/menu_per_role'
   defaults:
     _form: Drupal\menu_per_role\Form\MenuPermRoleAdminSettings
     _title: 'Menu per Role'
   requirements:
     _permission: 'administer menu_per_role'
-
