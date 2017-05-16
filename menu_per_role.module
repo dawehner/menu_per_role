@@ -25,6 +25,7 @@ function menu_per_role_entity_base_field_info_alter(&$fields, EntityTypeInterfac
     ->setSetting('target_type', 'user_role')
     ->setDisplayOptions('form', [
       'type' => 'options_buttons',
+      'weight' => 0,
     ]);
 
   $fields['menu_per_role__hide_role'] = BaseFieldDefinition::create('entity_reference')
@@ -35,5 +36,6 @@ function menu_per_role_entity_base_field_info_alter(&$fields, EntityTypeInterfac
     ->setSetting('target_type', 'user_role')
     ->setDisplayOptions('form', [
       'type' => 'options_buttons',
+      'weight' => 0,
     ]);
 }
