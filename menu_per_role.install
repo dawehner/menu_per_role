@@ -24,6 +24,7 @@ function menu_per_role_install() {
     ->setProvider('menu_per_role')
     ->setDisplayOptions('form', [
       'type' => 'options_buttons',
+      'weight' => 0,
     ]);
   $update_manager->installFieldStorageDefinition('menu_per_role__show_role', 'menu_link_content', 'menu_per_role', $definition);
 
@@ -36,6 +37,7 @@ function menu_per_role_install() {
     ->setProvider('menu_per_role')
     ->setDisplayOptions('form', [
       'type' => 'options_buttons',
+      'weight' => 0,
     ]);
   $update_manager->installFieldStorageDefinition('menu_per_role__hide_role', 'menu_link_content', 'menu_per_role', $definition);
 }
