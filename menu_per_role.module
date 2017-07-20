@@ -8,9 +8,12 @@
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Implements hook_entity_base_field_info_alter().
+ *
+ * Addes two fields to menu_link_content, so access restrictions can be set.
  */
 function menu_per_role_entity_base_field_info_alter(&$fields, EntityTypeInterface $entity_type) {
   if ($entity_type->id() != 'menu_link_content') {
@@ -31,11 +34,39 @@ function menu_per_role_entity_base_field_info_alter(&$fields, EntityTypeInterfac
   $fields['menu_per_role__hide_role'] = BaseFieldDefinition::create('entity_reference')
     ->setName('menu_per_role__hide_role')
     ->setTargetEntityTypeId('menu_link_content')
-    ->setLabel(t('Roles able to not see the menu link'))
+    ->setLabel(t('Roles not able see the menu link.'))
     ->setCardinality(FieldStorageDefinitionInterface::CARDINALITY_UNLIMITED)
     ->setSetting('target_type', 'user_role')
     ->setDisplayOptions('form', [
       'type' => 'options_buttons',
       'weight' => 0,
     ]);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Alter menu_link_content fields to hide extra fields on content.
+ */
+function menu_per_role_form_menu_link_content_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $config = \Drupal::config('menu_per_role.settings');
+
+  // Get config properties.
+  $uid1_see_all = $config->get('uid1_see_all', FALSE);
+  $admin_see_all = $config->get('admin_see_all', FALSE);
+  $hide_show_mode = (int) $config->get('hide_show', MenuPerRoleAdminSettings::MODE_DISPLAY_BOTH);
+
+  $user = \Drupal::currentUser();
+
+  // Check for the display of each field.
+  $display_show_roles = $alwaysShow || $hide_show_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ONLY_HIDE;
+  $display_hide_roles = $alwaysShow || $hide_show_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ONLY_SHOW;
+
+  // Hide fields if they need to be.
+  if (!$display_show_roles) {
+    $form["menu_per_role__show_role"]["#access"] = FALSE;
+  }
+  if (!$display_hide_roles) {
+    $form["menu_per_role__hide_role"]["#access"] = FALSE;
+  }
 }

@@ -14,6 +14,21 @@ use Drupal\Core\Url;
 class MenuPerRoleAdminSettings extends ConfigFormBase {
 
   /**
+   * Display both hide and show role checkbox lists.
+   */
+  const MODE_DISPLAY_BOTH = 0;
+
+  /**
+   * Display only the hide from checkbox list.
+   */
+  const MODE_DISPLAY_ONLY_HIDE = 1;
+
+  /**
+   * Display only the show to checkbox list.
+   */
+  const MODE_DISPLAY_ONLY_SHOW = 2;
+
+  /**
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
@@ -58,9 +73,9 @@ class MenuPerRoleAdminSettings extends ConfigFormBase {
       '#type' => 'radios',
       '#title' => $this->t('Select what is shown when editing menu items'),
       '#options' => [
-        0 => $this->t('Hide and Show check boxes'),
-        1 => $this->t('Only Hide check boxes'),
-        2 => $this->t('Only Show check boxes')
+        static::MODE_DISPLAY_BOTH => $this->t('Hide and Show check boxes'),
+        static::MODE_DISPLAY_ONLY_HIDE => $this->t('Only Hide check boxes'),
+        static::MODE_DISPLAY_ONLY_SHOW => $this->t('Only Show check boxes'),
       ],
       '#description' => $this->t('By default, both list of check boxes are shown when editing a menu item (in the menu administration area or while editing a node.) This option let you choose to only show the "Show menu item only to selected roles" or "Hide menu item from selected roles". WARNING: changing this option does not change the existing selection. This means some selection will become invisible when you hide one of the set of check boxes...'),
       '#default_value' => $config->get('hide_show'),
