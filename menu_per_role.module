@@ -9,6 +9,7 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\menu_per_role\Form\MenuPerRoleAdminSettings;
 
 /**
  * Implements hook_entity_base_field_info_alter().
@@ -55,12 +56,39 @@ function menu_per_role_form_menu_link_content_form_alter(&$form, FormStateInterf
   $uid1_see_all = $config->get('uid1_see_all', FALSE);
   $admin_see_all = $config->get('admin_see_all', FALSE);
   $hide_show_mode = (int) $config->get('hide_show', MenuPerRoleAdminSettings::MODE_DISPLAY_BOTH);
+  $hide_on_content_mode = (int) $config->get('hide_on_content', MenuPerRoleAdminSettings::MODE_DISPLAY_ON_CONTENT_ALWAYS);
 
   $user = \Drupal::currentUser();
 
+  $is_uid_1 = $uid1_see_all && ((int) $user->id() == 1);
+  $is_admin = $admin_see_all && $user->hasPermission("administer menu_per_role");
+  $alwaysShow = $is_uid_1 || $is_admin;
+
+  // Check if content mode setting applies, and if fields should be hidden.
+  $is_content = FALSE;
+  if ($hide_on_content_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ON_CONTENT_ALWAYS) {
+    $form_obj = $form_state->getFormObject();
+    $menu_link = $form_obj->getEntity();
+    if ($menu_link) {
+      $link_url = $menu_link->getUrlObject();
+      if ($link_url->isRouted()) {
+        $route_params = $link_url->getRouteParameters();
+        if (array_key_exists("node", $route_params)) {
+          // Nodes routes will contain a 'node' with 'nid' value.
+          if ($hide_on_content_mode == MenuPerRoleAdminSettings::MODE_DISPLAY_ON_CONTENT_NO_NODE_ACCESS) {
+            // For the existance of any hook_node_grants() implementations.
+            $is_content = !empty(\Drupal::moduleHandler()->getImplementations('node_grants'));
+          }
+          // If false, then check if the setting is display never.
+          $is_content = $is_content || $hide_on_content_mode == MenuPerRoleAdminSettings::MODE_DISPLAY_ON_CONTENT_NEVER;
+        }
+      }
+    }
+  }
+
   // Check for the display of each field.
-  $display_show_roles = $alwaysShow || $hide_show_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ONLY_HIDE;
-  $display_hide_roles = $alwaysShow || $hide_show_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ONLY_SHOW;
+  $display_show_roles = $alwaysShow || (!$is_content && $hide_show_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ONLY_HIDE);
+  $display_hide_roles = $alwaysShow || (!$is_content && $hide_show_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ONLY_SHOW);
 
   // Hide fields if they need to be.
   if (!$display_show_roles) {
