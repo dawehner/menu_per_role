@@ -11,7 +11,7 @@ use Drupal\Core\Url;
  *
  * @package Drupal\menu_per_role\Form
  */
-class MenuPermRoleAdminSettings extends ConfigFormBase {
+class MenuPerRoleAdminSettings extends ConfigFormBase {
 
   /**
    * {@inheritdoc}
