@@ -51,13 +51,13 @@ class MenuPerRoleLinkTreeManipulator extends DefaultMenuLinkTreeManipulators {
         // Check whether this role has visibility access (must be present).
         if ($show_role && count(array_intersect($show_role, $this->account->getRoles())) == 0) {
           $result = $result->andIf(AccessResult::forbidden()
-            ->addCacheContexts(array('user.roles')));
+            ->addCacheContexts(['user.roles']));
         }
 
         // Check whether this role has visibility access (must not be present).
         if ($hidden_role && count(array_intersect($hidden_role, $this->account->getRoles())) > 0) {
           $result = $result->andIf(AccessResult::forbidden()
-            ->addCacheContexts(array('user.roles')));
+            ->addCacheContexts(['user.roles']));
         }
       }
 

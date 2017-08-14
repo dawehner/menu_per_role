@@ -11,7 +11,37 @@ use Drupal\Core\Url;
  *
  * @package Drupal\menu_per_role\Form
  */
-class MenuPermRoleAdminSettings extends ConfigFormBase {
+class MenuPerRoleAdminSettings extends ConfigFormBase {
+
+  /**
+   * Display both hide and show role checkbox lists.
+   */
+  const MODE_DISPLAY_BOTH = 0;
+
+  /**
+   * Display only the hide from checkbox list.
+   */
+  const MODE_DISPLAY_ONLY_HIDE = 1;
+
+  /**
+   * Display only the show to checkbox list.
+   */
+  const MODE_DISPLAY_ONLY_SHOW = 2;
+
+  /**
+   * Always display fields on links to content.
+   */
+  const MODE_DISPLAY_ON_CONTENT_ALWAYS = 0;
+
+  /**
+   * Only display fields on menu items if there are no node_access providers.
+   */
+  const MODE_DISPLAY_ON_CONTENT_NO_NODE_ACCESS = 1;
+
+  /**
+   * Never display fields on links to content.
+   */
+  const MODE_DISPLAY_ON_CONTENT_NEVER = 2;
 
   /**
    * {@inheritdoc}
@@ -58,12 +88,24 @@ class MenuPermRoleAdminSettings extends ConfigFormBase {
       '#type' => 'radios',
       '#title' => $this->t('Select what is shown when editing menu items'),
       '#options' => [
-        0 => $this->t('Hide and Show check boxes'),
-        1 => $this->t('Only Hide check boxes'),
-        2 => $this->t('Only Show check boxes')
+        static::MODE_DISPLAY_BOTH => $this->t('Hide and Show check boxes'),
+        static::MODE_DISPLAY_ONLY_HIDE => $this->t('Only Hide check boxes'),
+        static::MODE_DISPLAY_ONLY_SHOW => $this->t('Only Show check boxes'),
       ],
       '#description' => $this->t('By default, both list of check boxes are shown when editing a menu item (in the menu administration area or while editing a node.) This option let you choose to only show the "Show menu item only to selected roles" or "Hide menu item from selected roles". WARNING: changing this option does not change the existing selection. This means some selection will become invisible when you hide one of the set of check boxes...'),
       '#default_value' => $config->get('hide_show'),
+    ];
+
+    $form['hide_on_content'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Show fileds on menu items that point to content'),
+      '#options' => [
+        static::MODE_DISPLAY_ON_CONTENT_ALWAYS => $this->t('Always'),
+        static::MODE_DISPLAY_ON_CONTENT_NO_NODE_ACCESS => $this->t('If NO Node Access Modules are enabled.'),
+        static::MODE_DISPLAY_ON_CONTENT_NEVER => $this->t('Never'),
+      ],
+      '#description' => $this->t('Fields are shown when editing any menu item. This will hide the fields when editing menu items, that point to nodes. This is useful on sites using Node Access modules.'),
+      '#default_value' => $config->get('hide_on_content'),
     ];
 
     return $form;
@@ -77,6 +119,7 @@ class MenuPermRoleAdminSettings extends ConfigFormBase {
       ->set('uid1_see_all', $form_state->getValue('uid1_see_all'))
       ->set('admin_see_all', $form_state->getValue('admin_see_all'))
       ->set('hide_show', $form_state->getValue('hide_show'))
+      ->set('hide_on_content', $form_state->getValue('hide_on_content'))
       ->save();
 
     parent::submitForm($form, $form_state);
