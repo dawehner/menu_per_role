@@ -69,7 +69,7 @@ function menu_per_role_form_menu_link_content_form_alter(&$form, FormStateInterf
   if ($hide_on_content_mode != MenuPerRoleAdminSettings::MODE_DISPLAY_ON_CONTENT_ALWAYS) {
     $form_obj = $form_state->getFormObject();
     $menu_link = $form_obj->getEntity();
-    if ($menu_link) {
+    if ($menu_link && !$menu_link->isNew()) {
       $link_url = $menu_link->getUrlObject();
       if ($link_url->isRouted()) {
         $route_params = $link_url->getRouteParameters();
